@@ -1,8 +1,3 @@
-use std::sync::{
-    atomic::{AtomicBool, Ordering},
-    Arc,
-};
-
 use clap::Parser;
 use tao::{
     event::{Event, WindowEvent},
@@ -10,6 +5,11 @@ use tao::{
     window::WindowBuilder,
 };
 use wry::WebViewBuilder;
+
+use std::sync::{
+    atomic::{AtomicBool, Ordering},
+    Arc,
+};
 
 #[derive(Parser)]
 pub struct Login {}
@@ -25,7 +25,20 @@ fn ipc_handler(message: String, should_close: Arc<AtomicBool>) {
         panic!("failed to retrieve login data");
     }
 
-    println!("{}", message);
+    // Construct creds file path
+    let config_path = dirs::config_local_dir()
+        .expect("failed to find config dir")
+        .join("ubi_cli");
+
+    let creds_file_path = config_path.join("creds.json");
+
+    println!("found creds! writing to {:?} ..", creds_file_path);
+
+    // Make sure config path exists
+    std::fs::create_dir_all(config_path).unwrap();
+
+    // Save data
+    std::fs::write(creds_file_path, message).expect("failed to write creds file");
 
     println!("closing window..");
     should_close.store(true, Ordering::Relaxed); // weird hack to closing window
