@@ -1,3 +1,8 @@
+use std::sync::{
+    atomic::{AtomicBool, Ordering},
+    Arc,
+};
+
 use clap::Parser;
 use tao::{
     event::{Event, WindowEvent},
@@ -15,12 +20,15 @@ const GENOME_ID: &str = "85c31714-0941-4876-a18d-2c7e9dce8d40";
 
 const REDIRECT_URL: &str = "https://connect.ubisoft.com/ready";
 
-fn ipc_handler(message: String) {
+fn ipc_handler(message: String, should_close: Arc<AtomicBool>) {
     if message == "FAILED" {
-        panic!("failed to retrieve token");
+        panic!("failed to retrieve login data");
     }
 
     println!("{}", message);
+
+    println!("closing window..");
+    should_close.store(true, Ordering::Relaxed); // weird hack to closing window
 }
 
 pub fn handle(_args: Login) {
@@ -30,6 +38,8 @@ pub fn handle(_args: Login) {
         .with_title("ubi-cli - login")
         .build(&event_loop)
         .unwrap();
+
+    let should_close_window = Arc::new(AtomicBool::new(false));
 
     // If not linux, get normal webview builder
     #[cfg(not(target_os = "linux"))]
@@ -45,6 +55,7 @@ pub fn handle(_args: Login) {
     };
 
     // Init new webview with auth url
+    let should_close_window_cloned = should_close_window.clone();
     let _webview = builder
         .with_url(format!(
             "https://connect.ubisoft.com/login?appId={}&genomeId={}&lang=en-US&nextUrl={}",
@@ -64,13 +75,17 @@ pub fn handle(_args: Login) {
                 }
             "#,
         )
-        .with_ipc_handler(ipc_handler)
+        .with_ipc_handler(move |message| ipc_handler(message, should_close_window_cloned.clone()))
         .build()
         .unwrap();
 
     // Run the window event loop
     event_loop.run(move |event, _, control_flow| {
         *control_flow = ControlFlow::Wait;
+
+        if should_close_window.load(Ordering::Relaxed) {
+            *control_flow = ControlFlow::Exit;
+        }
 
         if let Event::WindowEvent {
             event: WindowEvent::CloseRequested,
