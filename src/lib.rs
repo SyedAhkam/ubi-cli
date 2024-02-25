@@ -1,5 +1,8 @@
 use serde::Deserialize;
 
+pub const CONFIG_DIR_NAME: &str = "ubi_cli";
+pub const CREDS_FILE_NAME: &str = "creds.json";
+
 // NOTE: Ommited some useless fields from here
 #[derive(Deserialize, Debug)]
 #[serde(rename_all = "camelCase")]

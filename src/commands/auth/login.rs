@@ -4,6 +4,7 @@ use tao::{
     event_loop::{ControlFlow, EventLoop},
     window::WindowBuilder,
 };
+use ubi_cli::{CONFIG_DIR_NAME, CREDS_FILE_NAME};
 use wry::WebViewBuilder;
 
 use std::sync::{
@@ -28,9 +29,9 @@ fn ipc_handler(message: String, should_close: Arc<AtomicBool>) {
     // Construct creds file path
     let config_path = dirs::config_local_dir()
         .expect("failed to find config dir")
-        .join("ubi_cli");
+        .join(CONFIG_DIR_NAME);
 
-    let creds_file_path = config_path.join("creds.json");
+    let creds_file_path = config_path.join(CREDS_FILE_NAME);
 
     println!("found creds! writing to {:?} ..", creds_file_path);
 
