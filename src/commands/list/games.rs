@@ -10,7 +10,9 @@ pub fn handle(_args: Games) {
 
     let client = UbiClient::new(creds).unwrap();
 
-    let user = client.fetch_user().unwrap();
+    let games = client.fetch_games().unwrap();
 
-    println!("user: {:?}", user);
+    for (idx, game) in games.into_iter().enumerate() {
+        println!("{}. {} [{}]", idx + 1, game.name, game.id);
+    }
 }

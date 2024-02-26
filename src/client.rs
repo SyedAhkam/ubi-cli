@@ -1,9 +1,13 @@
-use std::str::FromStr;
+use std::{collections::HashMap, str::FromStr};
 
 use anyhow::Result;
 use reqwest::header;
+use serde_json::json;
 
-use crate::{resources::user::User, Credentials, APP_ID};
+use crate::{
+    resources::{game::Game, user::User},
+    Credentials, APP_ID,
+};
 
 pub struct UbiClient {
     pub creds: Credentials,
@@ -47,5 +51,47 @@ impl UbiClient {
             .send()?;
 
         Ok(resp.json::<User>()?)
+    }
+
+    pub fn fetch_games(&self) -> Result<Vec<Game>> {
+        let data = json!({
+            "operationName": "AllGames",
+            "query": r#"
+                fragment ownedGameProps on Game {
+                    id,
+                    spaceId,
+                    name,
+                }
+
+                query AllGames {
+                    viewer {
+                        games {
+                            nodes {
+                                ...ownedGameProps
+                            }
+                        }
+                    }
+                }
+            "#
+        });
+
+        let resp = self
+            .req_client
+            .post("https://public-ubiservices.ubi.com/v1/profiles/me/uplay/graphql")
+            .json(data.as_object().unwrap())
+            .send()?;
+
+        let parsed = resp.json::<HashMap<String, serde_json::Value>>()?;
+        let nodes = parsed
+            .get("data")
+            .unwrap()
+            .get("viewer")
+            .unwrap()
+            .get("games")
+            .unwrap()
+            .get("nodes")
+            .unwrap();
+
+        Ok(serde_json::from_value(nodes.to_owned())?)
     }
 }
