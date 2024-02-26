@@ -11,6 +11,7 @@ struct Cli {
 #[derive(Subcommand)]
 enum SubCommand {
     Auth(commands::auth::Auth),
+    List(commands::list::List),
 }
 
 fn main() {
@@ -18,5 +19,6 @@ fn main() {
 
     match args.command {
         SubCommand::Auth(args) => commands::auth::handle(args),
+        SubCommand::List(args) => commands::list::handle(args),
     }
 }

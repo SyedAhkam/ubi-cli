@@ -4,7 +4,7 @@ use tao::{
     event_loop::{ControlFlow, EventLoop},
     window::WindowBuilder,
 };
-use ubi_cli::{CONFIG_DIR_NAME, CREDS_FILE_NAME};
+use ubi_cli::{APP_ID, CONFIG_DIR_NAME, CREDS_FILE_NAME, GENOME_ID};
 use wry::WebViewBuilder;
 
 use std::sync::{
@@ -14,10 +14,6 @@ use std::sync::{
 
 #[derive(Parser)]
 pub struct Login {}
-
-// These variables are taken straight from the official ubisoft site
-const APP_ID: &str = "314d4fef-e568-454a-ae06-43e3bece12a6";
-const GENOME_ID: &str = "85c31714-0941-4876-a18d-2c7e9dce8d40";
 
 const REDIRECT_URL: &str = "https://connect.ubisoft.com/ready";
 

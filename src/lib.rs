@@ -1,22 +1,12 @@
-use serde::Deserialize;
+pub mod client;
+pub mod resources;
+
+// Re-exports for convinience
+pub use resources::credentials::Credentials;
 
 pub const CONFIG_DIR_NAME: &str = "ubi_cli";
 pub const CREDS_FILE_NAME: &str = "creds.json";
 
-// NOTE: Ommited some useless fields from here
-#[derive(Deserialize, Debug)]
-#[serde(rename_all = "camelCase")]
-pub struct Credentials {
-    pub ticket: String,
-    pub two_factor_authentication_ticket: Option<String>,
-    pub profile_id: String,
-    pub user_id: String,
-    pub name_on_platform: String,
-    pub expiration: chrono::DateTime<chrono::Utc>,
-    pub space_id: String,
-    pub session_id: String,
-    pub session_key: String,
-    pub remember_me_ticket: String,
-    pub remember_device_ticket: String,
-    pub email: String,
-}
+// These variables are taken straight from the official ubisoft site
+pub const APP_ID: &str = "314d4fef-e568-454a-ae06-43e3bece12a6";
+pub const GENOME_ID: &str = "85c31714-0941-4876-a18d-2c7e9dce8d40";
